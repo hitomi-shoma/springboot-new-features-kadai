@@ -100,3 +100,16 @@ INSERT IGNORE INTO review (id, user_id, house_id, score, review_text) VALUES (8,
 INSERT IGNORE INTO review (id, user_id, house_id, score, review_text) VALUES (9, 9, 1, 5, '値段も安く、機会があればリピートしたいと思います。');
 INSERT IGNORE INTO review (id, user_id, house_id, score, review_text) VALUES (10, 10, 1, 4, 'スタッフの方とても親切でした！');
 INSERT IGNORE INTO review (id, user_id, house_id, score, review_text) VALUES (11, 11, 1, 4, '今回初めて利用させてもらいました。近くのラーメン屋さんにも寄る事が出来て大変満足でした。');
+
+-- favoriteテーブル
+INSERT IGNORE INTO favorite (id, user_id, house_id) VALUES (1, 1, 1);
+INSERT IGNORE INTO favorite (id, user_id, house_id) VALUES (2, 1, 2);
+INSERT IGNORE INTO favorite (id, user_id, house_id) VALUES (3, 1, 3);
+INSERT IGNORE INTO favorite (id, user_id, house_id) VALUES (4, 1, 4);
+INSERT IGNORE INTO favorite (id, user_id, house_id) VALUES (5, 1, 5);
+INSERT IGNORE INTO favorite (id, user_id, house_id) VALUES (6, 1, 6);
+INSERT IGNORE INTO favorite (id, user_id, house_id) VALUES (7, 1, 7);
+INSERT IGNORE INTO favorite (id, user_id, house_id) VALUES (8, 1, 8);
+INSERT IGNORE INTO favorite (id, user_id, house_id) VALUES (9, 1, 9);
+INSERT IGNORE INTO favorite (id, user_id, house_id) VALUES (10, 1, 10);
+INSERT IGNORE INTO favorite (id, user_id, house_id) VALUES (11, 1, 11);

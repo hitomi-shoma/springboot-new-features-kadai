@@ -1,4 +1,3 @@
-
 package com.example.samuraitravel.controller;
 
 import java.util.List;
@@ -14,10 +13,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.example.samuraitravel.entity.Favorite;
 import com.example.samuraitravel.entity.House;
 import com.example.samuraitravel.entity.Review;
 import com.example.samuraitravel.form.ReservationInputForm;
+import com.example.samuraitravel.repository.FavoriteRepository;
 import com.example.samuraitravel.repository.HouseRepository;
 import com.example.samuraitravel.repository.ReviewRepository;
 import com.example.samuraitravel.security.UserDetailsImpl;
@@ -27,10 +29,12 @@ import com.example.samuraitravel.security.UserDetailsImpl;
 public class HouseController {
 	private final HouseRepository houseRepository;
 	private final ReviewRepository reviewRepository;
-
-	public HouseController(HouseRepository houseRepository, ReviewRepository reviewRepository) {
+	private final FavoriteRepository favoriteRepository;
+	
+	public HouseController(HouseRepository houseRepository, ReviewRepository reviewRepository, FavoriteRepository favoriteRepository) {
 		this.houseRepository = houseRepository;
 		this.reviewRepository = reviewRepository;
+		this.favoriteRepository = favoriteRepository;
 	}
 
 	@GetMapping
@@ -78,27 +82,65 @@ public class HouseController {
 
 		return "houses/index";
 	}
-	
+	//	レビュー・お気に入り
     @GetMapping("/{id}")
     public String show(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl,
     		@PathVariable(name = "id") Integer id, Model model) {
-        House house = houseRepository.getReferenceById(id);
+        
+    	House house = houseRepository.getReferenceById(id);
+    	
         List<Review> reviewList = reviewRepository.findTop6ByHouseOrderByUpdatedAtDesc(house);        
         Integer userId = null;
         boolean isPosted = false;
+        boolean isFavorite = false;
+        
         if (userDetailsImpl != null) {
         	userId = userDetailsImpl.getUser().getId();
-            Review userReview = reviewRepository.getByUserAndHouse(userDetailsImpl.getUser(), house);
+            
+        	Review userReview = reviewRepository.getByUserAndHouse(userDetailsImpl.getUser(), house);
         	isPosted = userReview != null;
-        }
+        	
+        	Favorite favorite = favoriteRepository.getByUserAndHouse(userDetailsImpl.getUser(), house);	
+        	isFavorite = favorite != null;
+    	 	}
         
         model.addAttribute("house", house);
         model.addAttribute("userId", userId);
         model.addAttribute("isPosted", isPosted);
         model.addAttribute("reviewList", reviewList);
         model.addAttribute("reservationInputForm", new ReservationInputForm());
+        model.addAttribute("isFavorite", isFavorite);
         
-        return "houses/show";
+        return "houses/show";     
     }   
     
+    //  お気に入りの追加
+    @GetMapping("/{id}/addFavorite")
+    public String addFavorite(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl, 
+    						  @PathVariable(name = "id") Integer id,RedirectAttributes redirectAttributes,	
+    						  Model model) {
+    	
+    	House house = houseRepository.getReferenceById(id);
+    	Favorite favorite = new Favorite();	
+        favorite.setUser(userDetailsImpl.getUser());
+        favorite.setHouse(house);
+        favoriteRepository.save(favorite);
+        
+        redirectAttributes.addFlashAttribute("message", "お気に入りに追加しました。");
+        
+    	return "redirect:/houses/{id}";
+    }
+    
+    @GetMapping("/{id}/deleteFavorite")
+    public String deleteFavorite(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl,
+    							 @PathVariable(name = "id") Integer id,	
+    							 RedirectAttributes redirectAttributes,	
+    							 Model model) {
+    	
+    	House house = houseRepository.getReferenceById(id);
+    	favoriteRepository.deleteByUserAndHouse(userDetailsImpl.getUser(), house);	
+    	redirectAttributes.addFlashAttribute("message", "お気に入りを解除しました。");
+    	
+    	return "redirect:/houses/{id}";
+    }
 }
